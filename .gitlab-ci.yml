@@ -1,0 +1,40 @@
+stages:
+  - build
+  - publish
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:5.0
+  only:
+    - master
+  script:
+    - echo "Starting building $(pwd) for $CI_COMMIT_BRANCH ($CI_PROJECT_NAME)"
+    - echo -e "\e[1;32mCommit $CI_COMMIT_SHORT_SHA, $CI_COMMIT_DESCRIPTION in $CI_COMMIT_BRANCH, by $CI_COMMIT_AUTHOR"
+    - dotnet restore --interactive
+    - dotnet build --configuration Release
+    - echo -e "\e[1;32mDone."
+  tags:
+  - docker
+
+publish:
+  stage: publish
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  image: mcr.microsoft.com/dotnet/sdk:5.0
+  only:
+    - master
+  script:
+    - dotnet restore --interactive
+    - dotnet publish --configuration Release -o publish -p:PublishReadyToRun=true -p:PublishSingleFile=true --self-contained false -r linux-x64 -p:IncludeNativeLibrariesForSelfExtract=true
+    - mv publish/autoteams publish/autoteams-linux64
+    - dotnet publish --configuration Release -o publish -p:PublishSingleFile=true --self-contained false -r win-x64 -p:IncludeNativeLibrariesForSelfExtract=true
+    - mv publish/autoteams.exe publish/autoteams-win64.exe
+    - dotnet publish --configuration Release -o publish -p:PublishSingleFile=true --self-contained false -r osx-x64 -p:IncludeNativeLibrariesForSelfExtract=true
+    - mv publish/autoteams publish/autoteams-osx64
+  artifacts:
+    paths:
+      - publish/autoteams-linux64
+      - publish/autoteams-win64.exe
+      - publish/autoteams-osx64
+  tags:
+  - docker
