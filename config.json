@@ -1,0 +1,11 @@
+{
+    "headlessMode": false,
+    "allowMicrophone": true,
+    "allowWebcam": true,
+    "searchWaitTime": 5,
+    "loginToPasswordWaitTimeMilis": 700,
+    "maxLoadAttemptsForRefresh": 5,
+    "pageLoadedCheckIntervalMilis": 4000,
+    "outputDebug": false,
+    "schedulerSyncOnSecond": 10
+}
